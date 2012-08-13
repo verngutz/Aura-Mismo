@@ -6,9 +6,11 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <limits>
 #include <fftw3.h>
 #include <sndfile.h>
 
@@ -16,6 +18,7 @@
 #define BUFFER_LEN 1024
 #define TESTING_FILE "testing.txt"
 #define WAVE_FILE "CMajorScale.wav"
+#define NUM_PEAKS 20
 
 using namespace std;
 
@@ -77,7 +80,7 @@ void hamming( int window_length, float *buffer ) {
 }
 
 void stft( vector<float> &signal, long signal_length, int window_size, int hop_size, ofstream &testing_file ) {
-
+	
 	// declare input data bucket, output fft_result bucket, and plan
 	fftw_complex *data, *fft_result;
 	fftw_plan plan_forward;
@@ -100,8 +103,9 @@ void stft( vector<float> &signal, long signal_length, int window_size, int hop_s
 	long num_chunks = 0;
 	int x = 0;
 	while( chunk_pos < signal_length && !stop ) {
-		if(x++ % 5 == 0) {
+		if(x++ % 10 == 0) {
 			cout << ".";
+			cout.flush();
 		}
 		for( int i = 0; i < window_size; i++ ) {
 			read_index = chunk_pos + i;
@@ -117,9 +121,36 @@ void stft( vector<float> &signal, long signal_length, int window_size, int hop_s
 		}
 		fftw_execute( plan_forward );
 		
+		vector<double> peaks;
+		
 		for( int i = 0; i < window_size; i++ ) {
-			testing_file << (i == 0 ? "" : " ") << (i+1) << ":" << (fft_result[i][0] * fft_result[i][0]);
-			// TO-DO: find out if fft_result[j][1] should be discarded or not, right now it is discarded
+			double mag = fft_result[i][0] * fft_result[i][0];
+			// TO-DO: find out if fft_result[j][1] (complex part) should be discarded or not, right now it is discarded
+			if(peaks.size() < NUM_PEAKS) {
+				peaks.push_back(mag);
+			}
+			else {
+				int min_index = 0;
+				double min = numeric_limits<double>::max();
+				for(int k = 0; k < NUM_PEAKS; k++) {
+					if(peaks[k] < min) {
+						min = peaks[k];
+						min_index = k;
+					}
+				}
+				if(mag > min) {
+					peaks[min_index] = mag;
+				}
+			}
+		}
+		
+		bool firstentry = true;
+		for(int i = 0; i < window_size; i++) {
+			double mag = fft_result[i][0] * fft_result[i][0];
+			if(find(peaks.begin(), peaks.end(), mag) != peaks.end()) {
+				testing_file << (firstentry ? "" : " ") << (i+1) << ":" << (int)(mag);
+				firstentry = false;
+			}
 		}
 		
 		testing_file << endl;

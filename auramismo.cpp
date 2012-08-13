@@ -91,55 +91,55 @@ static char* readline(FILE *input)
 
 void predict(FILE *input, FILE *output, struct svm_model* model[]) 
 {
-	struct svm_node *x = (struct svm_node *) malloc(max_nr_attr*sizeof(struct svm_node));
-
 	int chunk_num = 0;
 	
 	max_line_len = 1024;
 	line = (char *)malloc(max_line_len*sizeof(char));
 	while(readline(input) != NULL)
 	{
-		cout << "Processing chunk number: " << chunk_num++ << endl;
+		cout << "Processing chunk number: " << chunk_num++;
+		struct svm_node *x = (struct svm_node *) malloc(max_nr_attr*sizeof(struct svm_node));
+		
+		int i = 0;
+		double predict_label;
+		char *idx, *val, *label, *endptr;
+		int inst_max_index = -1; // strtol gives 0 if wrong format, and precomputed kernel has <index> start from 0
+
+		label = strtok(line," \t\n");
+	
+		while(1)
+		{
+			if(i>=max_nr_attr-1)	// need one more for index = -1
+			{
+				max_nr_attr *= 2;
+				x = (struct svm_node *) realloc(x,max_nr_attr*sizeof(struct svm_node));
+			}
+
+			idx = strtok(NULL,":");
+			val = strtok(NULL," \t");
+
+			if(val == NULL)
+				break;
+			errno = 0;
+			x[i].index = (int) strtol(idx,&endptr,10);
+			inst_max_index = x[i].index;
+
+			errno = 0;
+			x[i].value = strtod(val,&endptr);
+			
+			++i;
+		}
+		x[i].index = -1;
+
 		for(int k = 0; k < NUM_KEYS; k++)
 		{
-			int i = 0;
-			double predict_label;
-			char *idx, *val, *label, *endptr;
-			int inst_max_index = -1; // strtol gives 0 if wrong format, and precomputed kernel has <index> start from 0
-
-			label = strtok(line," \t\n");
-		
-			while(1)
-			{
-				if(i>=max_nr_attr-1)	// need one more for index = -1
-				{
-					max_nr_attr *= 2;
-					x = (struct svm_node *) realloc(x,max_nr_attr*sizeof(struct svm_node));
-				}
-
-				idx = strtok(NULL,":");
-				val = strtok(NULL," \t");
-
-				if(val == NULL)
-					break;
-				errno = 0;
-				x[i].index = (int) strtol(idx,&endptr,10);
-				inst_max_index = x[i].index;
-
-				errno = 0;
-				x[i].value = strtod(val,&endptr);
-
-				++i;
-			}
-			x[i].index = -1;
-
 			predict_label = svm_predict(model[k],x);
-			fprintf(output, "%d ", (predict_label == 1 ? 1 : 0));
+			fprintf(output, "%d ", (predict_label == 1 ? 1 : 0));	
 		}
+		
+		free(x);
 		fprintf(output, "\n");
 	}
-	
-	free(x);
 }
 
 

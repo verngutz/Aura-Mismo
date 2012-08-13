@@ -7,11 +7,15 @@
 #include <sstream>
 #include "svm.h"
 
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
 #define TRAINING_FILE "training"
 #define LABEL_FILE "label/"
 #define WAVE_FILE "wav/"
-#define START 5
+#define START 0
 #define NUM_KEYS 12
 
 using namespace std;
@@ -25,7 +29,7 @@ int main() {
 	struct svm_parameter param;
 	param.svm_type = C_SVC;
 	param.kernel_type = RBF;
-	param.degree = 3;
+	param.degree = 12;
 	param.gamma = 0;
 	param.coef0 = 0;
 	param.nu = 0.5;
@@ -39,40 +43,56 @@ int main() {
 	param.weight_label = NULL;
 	param.weight = NULL;
 		
+	// pids for forking	
+//   pid_t childPids[NUM_KEYS];
+//	pid_t p;
+	
 	// create SVM for each training file
 	for( int i = START; i < NUM_KEYS; i++ ) {
 
-		// get training file name
-   	stringstream training_file_name;
-   	training_file_name << TRAINING_FILE << i << ".txt";
-   	
-		// create SVM problem from training file
-		struct svm_problem prob;
-		read_problem( training_file_name.str().c_str(), param, prob );
-		const char * error_msg = svm_check_parameter( &prob, &param );
-		if( error_msg ) {
-			fprintf( stderr, "ERROR: %s\n", error_msg );
-			return 1;
-		}
+		// fork
+//		if ((p = fork()) == 0) {
+			// get training file name
+			stringstream training_file_name;
+			training_file_name << TRAINING_FILE << i << ".txt";
+			
+			// create SVM problem from training file
+			struct svm_problem prob;
+			read_problem( training_file_name.str().c_str(), param, prob );
+			const char * error_msg = svm_check_parameter( &prob, &param );
+			if( error_msg ) {
+				fprintf( stderr, "ERROR: %s\n", error_msg );
+				return 1;
+			}
 		
-		// get model file name
-		stringstream model_file_name;
-		model_file_name << training_file_name.str() << ".model";
+			// get model file name
+			stringstream model_file_name;
+			model_file_name << training_file_name.str() << ".model";
 		
-		cout << "Training: " << model_file_name.str() << endl;
+			cout << "Training: " << model_file_name.str() << endl;
 		
-		// train SVM and save the model to file
-		struct svm_model *model = svm_train( &prob, &param );
-		if( svm_save_model( model_file_name.str().c_str(), model ) ) {
-			fprintf( stderr, "can't save model to file %s\n", model_file_name.str().c_str() );
-			return 1;
-		}
+			// train SVM and save the model to file
+			struct svm_model *model = svm_train( &prob, &param );
+			if( svm_save_model( model_file_name.str().c_str(), model ) ) {
+				fprintf( stderr, "can't save model to file %s\n", model_file_name.str().c_str() );
+				return 1;
+			}
 		
-		// clean-up memory used by SVM training
-		svm_free_and_destroy_model( &model );
-		free( prob.y );
-		free( prob.x );
+			// clean-up memory used by SVM training
+			svm_free_and_destroy_model( &model );
+			free( prob.y );
+			free( prob.x );
+//			return 0;
+//	   }
+ //  	else {
+ //  	   childPids[i] = p;
+ //  	}
    }
+   
+   // wait for children to finish
+//	for (int i = 0; i < NUM_KEYS; i++) {
+//		while(waitpid(childPids[i], NULL, 0) == -1);
+//	}
    
 	svm_destroy_param( &param );
    
