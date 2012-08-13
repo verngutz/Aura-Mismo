@@ -1,0 +1,134 @@
+TiMidity Options: 
+
+TiMidity++ version 2.9.3 (C) 1999 Masanao Izumo <mo@goice.co.jp>
+The original version (C) 1995 Tuukka Toivonen <tt@cgs.fi>
+TiMidity is free software and comes with ABSOLUTELY NO WARRANTY.
+
+Win32 version by Davide Moretti <dave@rimini.com>
+and Daisuke Aoki <dai@y7.net>
+
+Usage:
+TIMIDITY.EXE [options] filename [...]
+
+
+Options:
+-4 Toggle 4-point interpolation (default on)
+-A n Amplify volume by n percent (may cause clipping)
+-a Enable the antialiasing filter
+-B n Set number of buffer fragments
+-C n Set ratio of sampling and control frequencies
+-c file Read extra configuration file
+-D n Play drums on channel n
+-E mode TiMidity sequencer extensional modes:
+    mode = w/W : Enable/Disable Modulation wheel.
+p/P : Enable/Disable Portamento.
+v/V : Enable/Disable NRPN Vibrato.
+s/S : Enable/Disable Channel pressure.
+t/T : Enable/Disable Trace Text Meta Event at playing
+o/O : Enable/Disable Overlapped voice
+m<HH>: Define default Manufacture ID <HH> in two hex
+b<n>: Use tone bank <n> as the default
+B<n>: Always use tone bank <n>
+F<args>: For effect. See below for effect options.
+default: -E wpvSTo
+-e Increase thread priority (evil) - be careful!
+-F Disable/Enable fast panning (toggle on/off, default is on)
+-f Enable fast decay mode (toggle)
+-h Display this help message
+-I n Use program n as the default
+-i mode Select user interface (see below for list)
+-j Realtime load instrument (toggle on/off)
+-k msec Specify audio queue time limit to reduce voice
+-L dir Append dir to search path
+-M name Specify PCM filename (*.wav or *.aiff) to be played or:
+    "auto": Play *.mid.wav or *.mid.aiff
+    "none": Disable this feature (default)
+-m msec Minimum time for a full volume sustained note to decay, 0 disables
+-O mode Select output mode and format (see below for list)
+-o file Output to another file (or device/server) (Use "-" for stdout)
+-P file Use patch file for all programs
+-p n(a) Allow n-voice polyphony. Optional auto polyphony reduction toggle.
+-p a Toggle automatic polyphony reduction. Enabled by default.
+-Q n Ignore channel n
+-q m/n Specify audio buffer in seconds
+    m:Maxmum buffer, n:Filled to start (default is 5.0/100%)
+    (size of 100% equals device buffer size)
+-R n Pseudo Reveb (set every instrument's release to n ms
+    if n=0, n is set to 800(default)
+-s f Set sampling frequency to f (Hz or kHz)
+-S n Cache size (0 means no cache)
+-t code Output text language code:
+    code=auto : Auto conversion by `LANG' environment variable (UNIX only)
+ascii : Convert unreadable characters to '.'(0x2e)
+nocnv : No conversion
+1251 : Convert from windows-1251 to koi8-r
+euc : EUC-japan
+jis : JIS
+sjis : shift JIS
+-T n Adjust tempo to n%; 120=play MOD files with an NTSC Amiga's timing
+-U Unload instruments from memory between MIDI files
+-W mode Select WRD interface (see below for list)
+-w mode Windows extensional modes:
+    mode=r/R : Enable/Disable rcpcv dll
+-x "configuration-string"
+    Read configuration from command line argument
+-Z file Load frequency table
+
+Available WRD interfaces (-W option):
+-Ww Windows Console WRD tracer
+-Wt TTY WRD tracer
+-Wd dumb WRD tracer
+-W- No WRD trace
+
+Available output modes (-O option):
+-Od Windows audio driver
+-Ow RIFF WAVE file
+-Or Raw waveform data
+-Ou Sun audio file
+-Oa AIFF file
+-Ol List MIDI event
+
+Output format options (append to -O? option):
+`8' 8-bit sample width
+`1' 16-bit sample width
+`U' U-Law encoding
+`A' A-Law encoding
+`l' linear encoding
+`M' monophonic
+`S' stereo
+`s' signed output
+`u' unsigned output
+`x' byte-swapped output
+
+Available interfaces (-i option):
+-in ncurses interface
+-iT vt100 interface
+-id dumb interface
+
+Interface options (append to -i? option):
+`v' more verbose (cumulative)
+`q' quieter (cumulative)
+`t' trace playing
+`l' loop playing (some interface ignore this option)
+`r' randomize file list arguments before playing
+`s' sorting file list arguments before playing
+
+Effect options:
+-EFdelay=l : Left delay
+-EFdelay=r : Right delay
+-EFdelay=b : Rotate left & right
+-EFdelay=0 : Disabled delay effect
+-EFchorus=0 : Disable MIDI chorus effect control
+-EFchorus=1[,level] : Enable MIDI chorus effect control
+    `level' is optional to specify chorus level [0..127]
+-EFchorus=2[,level] : Surround sound, chorus detuned to a lesser degree.
+    `level' is optional to specify chorus level [0..127]
+-EFreverb=0 : Disable MIDI reverb effect control
+-EFreverb=1[,level] : Enable MIDI reverb effect control
+    `level' is optional to specify reverb level [0..127]
+    This effect is only available in stereo
+-EFreverb=2 : Global reverb effect
+-EFns=n : Enable the n th degree noiseshaping filter. n:[0..4]
+    This effect is only available for 8-bit linear encoding 
+
+ 
