@@ -15,7 +15,7 @@ public class Mtext
 			blah.write("MFile 0 1 384\nMTrk\n0 TimeSig 4/4 24 8\n0 Tempo 500000\n0 PrCh ch=1 p=0\n");
 			for(int j = 0; j < size; j++)
 			{
-				int x = 21 + ((i + j) % 88);
+				int x = 21 + (int)(Math.random() * 88);
 				notes[j] = x;
 				blah.write("0 On ch=1 n="+x+" v=96\n");
 			}
