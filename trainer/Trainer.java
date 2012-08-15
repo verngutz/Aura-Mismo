@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 
-public class Mtext
+public class Trainer
 {
 	public static void main(String args[]) throws IOException
 	{

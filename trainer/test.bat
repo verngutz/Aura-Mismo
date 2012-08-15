@@ -1,0 +1,9 @@
+ECHO Deleting existing files...
+rm test.mtx
+rm test.out
+ECHO Converting Test Midi to Mtx
+echo.|Midi2Mtx test.mid
+ECHO Compiling Test Generator...
+javac Tester.java
+ECHO Running Test Generator...
+java Tester
