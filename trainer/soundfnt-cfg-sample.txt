@@ -1,0 +1,50 @@
+#--- Provided by Tim Brechbill http://timbrechbill.250free.com
+
+# This is a sample of what a soundfnt.cfg file looks like
+# Comment lines start with "#"
+
+#------ Add paths to soundfont or GUS patch files ------
+dir c:\timidity
+dir c:\timidity\sndfont
+
+#------ Put your sf2 files here ------
+soundfont merlin_gmv32.sf2
+#soundfont TimGM6mb.sf2
+#soundfont AnyOther.sf2
+
+#----------------------------------------------------------------
+# You can load multiple sf2 files, however 
+#     the last loaded soundfont overwrites previous
+# This way, you can load individual or a group of 
+#     your favorite sf2 instruments over top of the collection
+#----------------------------------------------------------------
+#soundfont My056Trumpet.sf2
+#soundfont My061Brass.sf2
+#soundfont SaxesTB.sf2
+
+#----------------------------------------------------------------
+# This is another way to overide your main sf2 file and select 
+#     individual instruments from other banks
+# Also easy to change volumes for instruments out of balance 
+# *************************************************
+# *** If you use any instruments in this manner ***
+# ***   YOU MUST EXCLUDE THEM ALSO (See Below)  ***
+# *************************************************
+#Format:  Instrument# %font sf2File sf2Bank sf2Instrument# 
+#            amp= & pan= are optional 
+#----------------------------------------------------------------
+bank 0
+64 %font SaxesTB.sf2 0 64 amp=130 pan=44
+65 %font SaxesTB.sf2 0 65 amp=110 pan=84
+66 %font SaxesTB.sf2 0 66 amp=100 pan=54
+67 %font SaxesTB.sf2 0 67 amp=140 pan=74
+73 %font cadenza.sf2 0 73 amp=130 pan=54
+
+#------ If you have already loaded a full sf2 bank of instruments
+#         then you must "exclude" them from the Main sf2 file
+#         in order to use the ones above.
+font exclude 64
+font exclude 65
+font exclude 66
+font exclude 67
+font exclude 73

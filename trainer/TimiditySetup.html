@@ -1,0 +1,174 @@
+<HTML>
+
+<HEAD>
+<TITLE>TiMidity++ Installation Guide</TITLE>
+</HEAD>
+
+<BODY link="Blue" vlink="Blue" alink="Purple">
+<DIV ALIGN="Center">
+<FONT FACE="Arial">
+
+<H2><I>TiMidity++ Installation Guide<BR>
+and
+<BR>Midi to Wav/Mp3 Conversion Instructions</I></H2>
+<FORM><INPUT TYPE="button" VALUE="Close Window" onClick="window.close()"></FORM>
+by <A HREF="http://timbrechbill.250free.com" Target=_BLANK>Tim Brechbill</A><BR>
+</DIV>
+<BR>To ask a question, please visit the 
+<A HREF="http://earth.prohosting.com/saxguru/TimidityForum.shtml" Target=_BLANK>TiMidity++ Forum</A>
+<BR><BR>
+TiMidity doesn't work by itself. TiMidity needs soundfonts or a GUS/patch set 
+to emulate real instruments. There is no WAVE information in *.mid file, so 
+TiMidity uses a GUS/patch or sf2 soundfont to play/convert MIDI to WAV or MP3. 
+<BR><BR>
+
+
+<FONT size="+2" color="Red"><B><U>FREE Soundfonts</B></U></FONT>
+<BR>Many GUS/patches and soundfonts are available from the internet. 
+<BR>Here are my <B> 
+<A HREF="http://earth.prohosting.com/saxguru/index.html#sf2" Target=_Blank>Recommended Free Soundfonts</A></B><BR>
+<BR>
+<Font size=+2 Color=Red><B><U><BR>
+SETUP<BR></B></U>
+</Font>
+If you have downloaded my timdity_setup.exe self-extracting setup file, locate 
+   it in the directory where you downloaded it, and run it (double-click on it).<BR>
+   Please accept the default directory (C:\) when prompted for simplicity.<BR>
+   The TiMidity software will be installed in the directory 'c:\timidity'.<BR>
+   Timidity.cfg is the default configuration for the Timidity GUI program (timw32g.exe), 
+   but my installation changes it to TimGM6mb.cfg. 
+   Launch timw32g.exe and File, Open midi files or playlists of your choice.
+<BR><BR>
+<Font size=+2 Color=Red><B><U><BR>
+LOADING SOUNDFONTS<BR></B></U>
+</Font>
+If you change soundfonts regularly, you may create a different .cfg file
+   for each soundfont file and "load" it from the GUI program. 
+<BR>    1) Copy the TimGM6mb.cfg file and rename so you can recognize it
+<BR>	2) Edit the new cfg file with WordPad and change the path and soundfont
+<BR><DD>Be sure to <b>enclose path and filename in "double quotes" if there are any spaces in them</b>
+<BR>	3) Save this file
+<BR>	4) Launch the GUI program
+<BR>	5) On the Menu, Click on the "Config, Load ini file"
+<BR>	6) In the Config File box, Browse and select your new .cfg file
+<BR>	7) Click "Force Reload of Config File" button
+<BR>	8) The last cfg file loaded will now become the default.
+<BR>I prefer this method, since you only have to setup a file one time for each soundfont.
+<P>If you rarely use a different soundfont then you can
+<BR><Li>Open the c:\timidity\soundfnt.cfg file with WordPad
+<BR><Li>Add the path to your SF2 file(s)
+<BR><DD>Be sure to <b>enclose the path in "double quotes" if there are any spaces in the path</b>
+<BR><Li>Comment out the current soundfount with a "#" 
+<BR><Li>Add a line for your soundfont.
+<BR><DD>Be sure to <b>enclose it in "double quotes" if there are any spaces in the sf2 filename</b>
+<BR><Li>Save this file
+<BR><Li>Launch the GUI program
+<BR><Li>On the Menu, Click on the "Config, Load ini file"
+<BR><Li>In the Config File box, Browse and select the soundfnt.cfg file
+<BR><Li>Click "Force Reload of Config File" button</Li>
+<BR><BR>
+<Font size=+2 Color=Red><B><U><BR>
+CREATING PLAYLISTS<BR></B></U>
+</Font>
+Launch the GUI program (timw32g.exe). Open files you want in your Playlist. 
+Select File, Save Playlist As, and enter your PlaylistName.pls. You must use the .pls extension 
+for Timidity to recognize playlist files.
+<BR><BR>
+<Font size=+2 Color=Red><B><U><BR>
+TiMidity Midi to Wave Instructions<BR></B></U>
+</Font>
+<A name="Hear"></A>Before you try to convert a midi file, <b>please make sure you can hear the .mid file first when it is played with TiMidity</b>. 
+I answer a lot of questions about why TiMidity creates .wav/.mp3 files without any sound. Well, the short answer 
+is the output file will have nothing in it if TiMidity is configured incorrectly somehow and the simplest way to confirm 
+that everyting is OK is to simply <b>Play the .mid first</b>. If you hear the .mid, then the .wav/.mp3 should work fine. 
+If you can't hear the .mid, then there will be nothing in the .wav/.mp3 file when you convert it. 
+<P>The most common problems are from people who do not accept the default installation directory (c:\). <b>When you change the 
+installation directory, you must also manually edit the .cfg files TiMidity uses</b>. Here is how to see 
+<BR><B><U><font color=red >Which .cfg file am I using?</Font></b></U> 
+<dd><Li>Open the GUI program (timw32g.exe)
+<dd><li>Select Config, Preferences
+<dd><li>Verify that the filename and path are correct 
+<DD><DD>(the default with my installation is 'c:\timidity\TimGM6mb.sf2'). 
+<dd><li>If it is not correct, then Browse and select the correct cfg file. 
+<dd><li>Press OK, then File Exit. 
+<dd><li>Open TiMidity again and check it again just to be sure. 
+<p>Now that you have the right cfg file, 
+<dd><Li>Open the GUI program (timw32g.exe)
+<dd><li>Select Config, Preference, Output
+<dd><li>Verify "Windows audio driver" is the Output
+<dd><li>Press OK
+<dd><li>File Open a .mid file and Play it.
+<br>You should be able to hear the midi. If you can't hear it then there is a problem in your .cfg file,  
+and most likely it is a path or filename mistake. Find your .cfg file and edit it with WordPad. The 1st line should point to the directory 
+where you installed TiMidity. For example, if accepted the default (c:\) installation directory, this line will be:
+<DD><b>dir c:\timidity</b><P>If you decided to install to c:\Another Directory, then this line must be:
+<DD><b>dir "c:\Another Directory\timidity"</b><P>
+The "double quotes" are required since there is a space in the directory name. The 2nd line should point to the directory where your 
+.sf2 file is located. Again, put "double quotes" around any directory name that has a space in it like:
+<DD><b>dir "c:\Music\My Soundfounts"</b><P>
+Finally, the 3rd line has the name of the soundfont file you want to use. It must be in the directory you have in line 2. 
+Once again, put "double quotes" around any filename that has a space in it like:
+<DD><b>soundfont "Best Ever.sf2"</b><P> 
+If these 3 lines are correct, you used "double quotes" where needed, and you didn't fat finger anything, your .cfg file should be good. 
+<P><B><U><font color=red >How can I be sure the .cfg file is correct and my soundfont is loaded?</Font></b></U>
+<BR>For this example, I installed TiMidity in <b>c:\Program Files</b> and I want to use the <b>c:\Music\My Soundfonts\Best Ever.sf2</b>,  
+so I created <b>c:\Program Files\timidity\BestEver.cfg</b> with these 3 lines in it:
+<B><DD>dir "c:\Program Files\timidity"
+<DD>dir "c:\Music\My Soundfonts"
+<DD>soundfont Best Ever.sf2</b>
+<P>There is a mistake in line 3 of the .cfg file above. The sf2 filename has a space in it but I forgot to enclose it in "double quotes".
+Here's what I did to figure it out:
+<Li>Launch the GUI program (timw32g.exe)
+<li>Press the "CON" (Console) button
+<li>It said:<DD><B>Init soundfonts 'Best'
+<dd>Best: No such file or directory<dd>Can't open soundfont file Best</b>
+<P>I knew the soundfont I wanted was not named 'Best', so my cfg file must have an error in it. I launched WordPad, Opened  
+<b>c:\Program Files\timidity\BestEver.cfg</b>, and added the "double quotes" to line 3, <b>soundfont "Best Ever.sf2"</b>, then did the following: 
+<Li>Launch the GUI program (timw32g.exe)
+<li>Press the "CON" (Console) button
+<li>It said:<DD><B>Init soundfonts 'Best Ever.sf2'</b>
+<BR>There were no other error messages so I
+<li>Close the Console Window
+<li>File Open, select a midi file and Play it. I hear the midi playing.
+<P><B>Once you have confirmed that you can hear the .mid file</b>, follow the instructions below.
+<BR>GUI: Launch the GUI program (timw32g.exe). 
+<DD> 1) Select Config, Preference, Output.
+<DD> 2) Change the <Font color=Red>Config, Preference, Output</Font> from "Windows audio driver" to <A href="http://earth.prohosting.com/saxguru/WaveOut.jpg" target="_Blank">RIFF WAV file</A>"
+<DD> 3) Change the Dropdown directly below the Output to <Font color=Red>Auto Filename</Font>
+<DD> 4) If anything is in the <Font color=Red>Output File</Font>, Delete it.
+<DD> 5) Press OK, or Apply.
+<DD> 6) Load the files, or playlist of your choice and when you "Play" them, 
+        a .wav file will be created in the same directory as the .mid file 
+        with the same name.
+<DD> 7) Be sure to <B>change the Output back to "Windows audio driver"</b> when you 
+        want to Play without converting to WAV.
+<BR><BR>
+You can use the GUI version, or the MidiWav.bat file
+<BR><BR>
+By default it will create a file in the same directory as the midi and
+use the same filename with the .wav extension. 
+<BR><BR>
+You can convert multiple midi files by dropping a playlist file with all of  
+the midis you want to convert.  You can create the playlist file with the GUI
+version or use Wordpad to create/edit a text file with the full path and 
+filenames of the midis you want to play/convert and save it with a 
+".pls" extension.
+<BR><BR>
+Simply select your midi file or playlist file, drag & drop it on the 
+MidiWav.bat file and wait until it is complete.
+<BR><BR>
+I actually prefer the DOS version to play midi as well. Just drag and drop 
+your midi or playlist to MidiPlay.bat 
+<BR><BR>
+<Font size=+2 Color=Red><B><U><BR>
+TiMidity Midi to MP3 Instructions<BR></B></U>
+</Font>Make sure you can <a href="#Hear"><b>hear</b></a> the midi file when you play it before you try to convert it to MP3.  
+You cannot convert to MP3 with the .bat program so you must use the GUI Version.<BR>
+Launch the GUI program (timw32g.exe). 
+<BR>     1) Select Config, Preference, Output.
+<BR>     2) Change the Output from "Windows audio driver" to <A href="http://earth.prohosting.com/saxguru/GogoOut.gif" target="_Blank">"MP3 GOGO"</A>
+<BR>     3) Follow steps 3-7 above.
+<FORM><INPUT TYPE="button" VALUE="Close Window" onClick="window.close()"></FORM><BR>
+<BR><CENTER>
+	<!--#exec cgi="cgi-bin/mcount.cgi" -->
+</CENTER>

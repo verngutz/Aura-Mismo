@@ -1,8 +1,16 @@
 docs/
 build/
+trainer/label/
+trainer/mtx/
+trainer/midi
+trainer/test.mid
+trainer/test.wav
+trainer/test.mtx
+trainer/test.out
 MatLAB v7.14/
 *.h~
 *.cpp~
 *.c~
 *.gitignore~
+*.class
 
