@@ -15,7 +15,7 @@
 #define TRAINING_FILE "training"
 #define LABEL_FILE "label/"
 #define WAVE_FILE "wav/"
-#define START 0
+#define START 6
 #define NUM_KEYS 12
 
 using namespace std;
@@ -49,7 +49,7 @@ int main() {
 	
 	// create SVM for each training file
 	for( int i = START; i < NUM_KEYS; i++ ) {
-
+		cout << "Training Key: " << i << endl;
 		// fork
 //		if ((p = fork()) == 0) {
 			// get training file name
@@ -61,7 +61,7 @@ int main() {
 			read_problem( training_file_name.str().c_str(), param, prob );
 			const char * error_msg = svm_check_parameter( &prob, &param );
 			if( error_msg ) {
-				fprintf( stderr, "ERROR: %s\n", error_msg );
+				fprintf( stdout, "ERROR: %s\n", error_msg );
 				return 1;
 			}
 		
@@ -74,7 +74,7 @@ int main() {
 			// train SVM and save the model to file
 			struct svm_model *model = svm_train( &prob, &param );
 			if( svm_save_model( model_file_name.str().c_str(), model ) ) {
-				fprintf( stderr, "can't save model to file %s\n", model_file_name.str().c_str() );
+				fprintf( stdout, "can't save model to file %s\n", model_file_name.str().c_str() );
 				return 1;
 			}
 		
@@ -131,7 +131,7 @@ void read_problem( const char *filename, struct svm_parameter &param, struct svm
 	char *idx, *val, *label;
 
 	if( fp == NULL )	{
-		fprintf( stderr,"can't open input file %s\n", filename );
+		fprintf( stdout,"can't open input file %s\n", filename );
 		exit(1);
 	}
 
@@ -207,12 +207,12 @@ void read_problem( const char *filename, struct svm_parameter &param, struct svm
 	if( param.kernel_type == PRECOMPUTED ) {
 		for( i = 0; i < prob.l; i++ ) {
 			if ( prob.x[i][0].index != 0 ) {
-				fprintf( stderr, "Wrong input format: first column must be 0:sample_serial_number\n" );
+				fprintf( stdout, "Wrong input format: first column must be 0:sample_serial_number\n" );
 				exit(1);
 			}
 			if ( (int)prob.x[i][0].value <= 0 || (int)prob.x[i][0].value > max_index )
 			{
-				fprintf( stderr, "Wrong input format: sample_serial_number out of range\n" );
+				fprintf( stdout, "Wrong input format: sample_serial_number out of range\n" );
 				exit(1);
 			}
 		}

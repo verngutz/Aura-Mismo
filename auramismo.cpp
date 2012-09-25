@@ -97,7 +97,7 @@ void predict(FILE *input, FILE *output, struct svm_model* model[])
 	line = (char *)malloc(max_line_len*sizeof(char));
 	while(readline(input) != NULL)
 	{
-		cout << "Processing chunk number: " << chunk_num++;
+		cout << "Processing chunk number: " << chunk_num++ << endl;
 		struct svm_node *x = (struct svm_node *) malloc(max_nr_attr*sizeof(struct svm_node));
 		
 		int i = 0;
