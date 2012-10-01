@@ -118,13 +118,32 @@ public class Tester
 			}
 		}
 		
+		/**
+		// print debug info
+		for(int channelNum = 0; channelNum < channels.length; channelNum++)
+		{
+			System.out.println("channel: " + channelNum);
+			for(Map.Entry<Integer, boolean[]> a : noteEvents[channelNum].entrySet())
+			{
+				System.out.print(String.format("%1$5s", a.getKey()) + "\t\t");
+				for(int i = 0; i < a.getValue().length; i++)
+				{
+					System.out.print(" " + (a.getValue()[i] ? "1" : "0"));
+				}
+				System.out.println();
+			}
+			System.out.println();
+		}
+		*/
+		
 		for(int channelNum = 0; channelNum < channels.length; channelNum++)
 		{
 			// create a label row per chunk
 			for(int time = 0; ; time += TICKS_PER_CHUNK)
 			{
 				// get note event info at time nearest but lower than current chunk's time
-				boolean[] turnedOn = noteEvents[channelNum].floorEntry(time).getValue();
+				Map.Entry<Integer, boolean[]> noteEntry = noteEvents[channelNum].floorEntry(time);
+				boolean[] turnedOn = (noteEntry == null ? new boolean[channels[channelNum] == PIANO ? PIANO_NUMKEYCLASSES : drumAll.length] : noteEntry.getValue());
 				
 				out[channelNum].write(turnedOn[0] ? "1" : "0");
 				for(int noteNum = 1; noteNum < turnedOn.length; noteNum++)
