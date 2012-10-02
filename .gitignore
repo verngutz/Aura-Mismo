@@ -3,10 +3,10 @@ build/
 trainer/label/
 trainer/mtx/
 trainer/midi
-trainer/test.mid
-trainer/test.wav
-trainer/test.mtx
-trainer/test.out
+*.mid
+*.wav
+*.mtx
+*.out
 MatLAB v7.14/
 *.h~
 *.cpp~
