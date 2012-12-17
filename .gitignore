@@ -13,4 +13,5 @@ MatLAB v7.14/
 *.c~
 *.gitignore~
 *.class
-
+*.BAK
+*.nwc

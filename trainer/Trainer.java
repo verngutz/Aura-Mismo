@@ -3,7 +3,7 @@ import java.io.*;
 
 public class Trainer
 {
-	public static final int TRAINING_SIZE = 1500;
+	public static final int TRAINING_SIZE = 500;
 	
 	public static final int PIANO = 1;
 	public static final int PIANO_LOWEST = 21;
@@ -64,8 +64,30 @@ public class Trainer
 				}
 				else
 				{
-					// generate a biased random number of notes
-					sizes[channelNum] = (int)(((Math.random() * 12) + (Math.random() * 6) + (Math.random() * 3)) / 3);
+					if(dataNum % 2 == 0)
+					{
+						if(channels[channelNum] == PIANO)
+						{
+							// generate a biased random number of notes
+							sizes[channelNum] = 1;// + (int)(((Math.random() * 12) + (Math.random() * 6) + (Math.random() * 3)) / 3);
+						}
+						else if(channels[channelNum] == DRUMS)
+						{
+							sizes[channelNum] = 0;
+						}
+					}
+					else
+					{
+						if(channels[channelNum] == PIANO)
+						{
+							sizes[channelNum] = 0;
+						}
+						else if(channels[channelNum] == DRUMS)
+						{
+							// generate a biased random number of notes
+							sizes[channelNum] = 1;// + (int)(((Math.random() * 12) + (Math.random() * 6) + (Math.random() * 3)) / 3);
+						}
+					}
 				}
 			}
 			
