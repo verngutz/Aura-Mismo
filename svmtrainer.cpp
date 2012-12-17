@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <iostream>
 #include <sstream>
+#include <cstdlib> 
 #include "svm.h"
 
 #include <sys/types.h>
@@ -12,17 +13,14 @@
 #include <unistd.h>
 
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
-#define TRAINING_FILE "training"
-#define LABEL_FILE "label/"
-#define WAVE_FILE "wav/"
-#define START 6
-#define NUM_KEYS 12
+
+#include "params.h"
 
 using namespace std;
 
-void read_problem( const char *filename, struct svm_parameter &param, struct svm_problem &prob );
+void read_problem(const char *filename, struct svm_parameter &param, struct svm_problem &prob);
 
-int main() {
+int main(int argc, char* argv[]) {
 	cout << "Begin SVM training" << endl;
 	
 	// declare SVM parameters
@@ -42,64 +40,70 @@ int main() {
 	param.nr_weight = 0;
 	param.weight_label = NULL;
 	param.weight = NULL;
-		
-	// pids for forking	
-//   pid_t childPids[NUM_KEYS];
-//	pid_t p;
 	
+	int start = 0;
+	int end = NUM_KEYS + NUM_DRUM_GROUPS;
+	
+	if(argc > 1)
+	{
+		start = atoi(argv[1]);
+	}
+	if(argc > 2)
+	{
+		end = atoi(argv[2]);
+	}
+		
 	// create SVM for each training file
-	for( int i = START; i < NUM_KEYS; i++ ) {
-		cout << "Training Key: " << i << endl;
-		// fork
-//		if ((p = fork()) == 0) {
-			// get training file name
-			stringstream training_file_name;
-			training_file_name << TRAINING_FILE << i << ".txt";
-			
-			// create SVM problem from training file
-			struct svm_problem prob;
-			read_problem( training_file_name.str().c_str(), param, prob );
-			const char * error_msg = svm_check_parameter( &prob, &param );
-			if( error_msg ) {
-				fprintf( stdout, "ERROR: %s\n", error_msg );
-				return 1;
-			}
+	for( int i = start; i < end; i++ ) {
+		if(i < NUM_KEYS) {
+			cout << "Training Key: " << i << endl;
+		}
+		else {
+			cout << "Training Drum Group: " << i - NUM_KEYS << endl;
+		}
 		
-			// get model file name
-			stringstream model_file_name;
-			model_file_name << training_file_name.str() << ".model";
+		// get training file name
+		stringstream training_file_name;
+		if(i < NUM_KEYS)
+		{
+			training_file_name << PIANO_TRAINING_FILE << i << ".txt";
+		}
+		else
+		{
+			training_file_name << DRUM_TRAINING_FILE << i - NUM_KEYS << ".txt";
+		}
 		
-			cout << "Training: " << model_file_name.str() << endl;
-		
-			// train SVM and save the model to file
-			struct svm_model *model = svm_train( &prob, &param );
-			if( svm_save_model( model_file_name.str().c_str(), model ) ) {
-				fprintf( stdout, "can't save model to file %s\n", model_file_name.str().c_str() );
-				return 1;
-			}
-		
-			// clean-up memory used by SVM training
-			svm_free_and_destroy_model( &model );
-			free( prob.y );
-			free( prob.x );
-//			return 0;
-//	   }
- //  	else {
- //  	   childPids[i] = p;
- //  	}
+		// create SVM problem from training file
+		struct svm_problem prob;
+		read_problem( training_file_name.str().c_str(), param, prob );
+		const char * error_msg = svm_check_parameter( &prob, &param );
+		if( error_msg ) {
+			fprintf( stdout, "ERROR: %s\n", error_msg );
+			return 1;
+		}
+	
+		// get model file name
+		stringstream model_file_name;
+		model_file_name << training_file_name.str() << ".model";
+	
+		cout << "Training: " << model_file_name.str() << endl;
+	
+		// train SVM and save the model to file
+		struct svm_model *model = svm_train( &prob, &param );
+		if( svm_save_model( model_file_name.str().c_str(), model ) ) {
+			fprintf( stdout, "can't save model to file %s\n", model_file_name.str().c_str() );
+			return 1;
+		}
+	
+		// clean-up memory used by SVM training
+		svm_free_and_destroy_model( &model );
+		free( prob.y );
+		free( prob.x );
    }
-   
-   // wait for children to finish
-//	for (int i = 0; i < NUM_KEYS; i++) {
-//		while(waitpid(childPids[i], NULL, 0) == -1);
-//	}
    
 	svm_destroy_param( &param );
    
    cout << "SVM training done" << endl;
-   
-   // open testing file
-   
 	return 0;
 }
 
