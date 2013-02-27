@@ -3,12 +3,17 @@ import java.io.*;
 
 public class Trainer
 {
-	public static final int TRAINING_SIZE = 500;
+	public static final int TRAINING_SIZE = 6000;
 	
 	public static final int PIANO = 1;
 	public static final int PIANO_LOWEST = 21;
 	public static final int PIANO_NUMKEYS = 88;
 	public static final int PIANO_NUMKEYCLASSES = 12;
+	
+	public static final int CLARINET = 2;
+	public static final int CLARINET_LOWEST = 52;
+	public static final int CLARINET_NUMKEYS = 41;
+	public static final int CLARINET_NUMKEYCLASSES = 12;
 	
 	public static final int DRUMS = 10;
 	public static final int[] drumBass = {35, 36};
@@ -18,7 +23,8 @@ public class Trainer
 	public static final int[] drumTom = {41, 43, 45, 47, 48, 50};
 	public static final int[][] drumAll = { drumBass, drumSnare, drumCrash, drumHat, drumTom };
 	
-	public static final int[] channels = {PIANO, DRUMS};
+	public static final int[] channels = {PIANO, DRUMS, CLARINET};
+	public static final int[] programs = {0, 0, 71};
 	
 	public static void main(String args[]) throws IOException
 	{	
@@ -29,17 +35,21 @@ public class Trainer
 			// mtx is a text format that can be converted to midi, contains the music (see Mtx2Midi and Midi2Mtx)
 			// label contains the correct label for the produced mtx
 			FileWriter mtx = new FileWriter(new File(dataNum + ".mtx"));
+			FileWriter label = new FileWriter(new File(dataNum + ".label"));
+			/**
 			FileWriter[] label = new FileWriter[channels.length];
 			for(int channelNum = 0; channelNum < channels.length; channelNum++)
 			{
 				label[channelNum] = new FileWriter(new File(dataNum + "_" + channelNum + ".label"));
 			}
+			*/
 			
 			// determine how many notes should play for each instrument/channel
 			int[] sizes = new int[channels.length];
 			for(int channelNum = 0; channelNum < channels.length; channelNum++)
 			{
 				// first notes in sample are solo piano and drum notes
+				/**
 				if(dataNum < 88)
 				{
 					if(channels[channelNum] == PIANO)
@@ -64,30 +74,29 @@ public class Trainer
 				}
 				else
 				{
-					if(dataNum % 2 == 0)
+					if(channels[channelNum] == PIANO)
 					{
-						if(channels[channelNum] == PIANO)
-						{
-							// generate a biased random number of notes
-							sizes[channelNum] = 1;// + (int)(((Math.random() * 12) + (Math.random() * 6) + (Math.random() * 3)) / 3);
-						}
-						else if(channels[channelNum] == DRUMS)
-						{
-							sizes[channelNum] = 0;
-						}
+						// generate a biased random number of notes
+						sizes[channelNum] = 1; //+ (int)(((Math.random() * 12) + (Math.random() * 6) + (Math.random() * 3)) / 3);
 					}
-					else
+					else if(channels[channelNum] == DRUMS)
 					{
-						if(channels[channelNum] == PIANO)
-						{
-							sizes[channelNum] = 0;
-						}
-						else if(channels[channelNum] == DRUMS)
-						{
-							// generate a biased random number of notes
-							sizes[channelNum] = 1;// + (int)(((Math.random() * 12) + (Math.random() * 6) + (Math.random() * 3)) / 3);
-						}
+						// generate a biased random number of notes
+						sizes[channelNum] = 1; //+ (int)(((Math.random() * 12) + (Math.random() * 6) + (Math.random() * 3)) / 3);
 					}
+				}
+				*/
+				if(channels[channelNum] == PIANO)
+				{
+					sizes[channelNum] = dataNum % 2;
+				}
+				if(channels[channelNum] == DRUMS)
+				{
+					sizes[channelNum] = 0;
+				}
+				else if(channels[channelNum] == CLARINET)
+				{
+					sizes[channelNum] = (dataNum + 1) % 2;
 				}
 			}
 			
@@ -99,7 +108,7 @@ public class Trainer
 			}
 			
 			// begin writing mtx
-			mtx.write("MFile 1 " + channels.length + " 384\nMTrk\n0 TimeSig 4/4 24 8\n0 Tempo 500000\n0 Meta 0x21 00\n0 PrCh ch=1 p=0\n");
+			mtx.write("MFile 1 " + channels.length + " 384\nMTrk\n0 TimeSig 4/4 24 8\n0 Tempo 500000\n0 Meta 0x21 00\n");
 			
 			for(int channelNum = 0; channelNum < channels.length; channelNum++)
 			{
@@ -108,6 +117,11 @@ public class Trainer
 				{
 					mtx.write("MTrk\n");
 					mtx.write("0 Meta 0x21 00\n");
+					mtx.write("0 PrCh ch=" + channels[channelNum] + " p=" + programs[channelNum] + "\n");
+				}
+				else
+				{
+					mtx.write("0 PrCh ch=" + channels[channelNum] + " p=" + programs[channelNum] + "\n");
 				}
 				
 				mtx.write("0 Par ch=" + channels[channelNum] + " c=7 v=127\n");
@@ -123,14 +137,21 @@ public class Trainer
 					if(channels[channelNum] == PIANO)
 					{
 						// first notes in sample are solo piano notes
+						/**
 						if(dataNum < 88)
 						{
 							midiNum = PIANO_LOWEST + dataNum;
 						}
 						else if(dataNum >= 105)
+						*/
 						{
 							midiNum = PIANO_LOWEST + (int)(Math.random() * PIANO_NUMKEYS);
 						}
+					}
+					
+					else if(channels[channelNum] == CLARINET)
+					{
+						midiNum = CLARINET_LOWEST + (int)(Math.random() * CLARINET_NUMKEYS);
 					}
 					
 					// choose a note from the supported drum notes
@@ -231,7 +252,7 @@ public class Trainer
 			for(int channelNum = 0; channelNum < channels.length; channelNum++)
 			{
 				// classify piano notes into key classes
-				if(channels[channelNum] == PIANO)
+				if(channels[channelNum] == PIANO || channels[channelNum] == CLARINET)
 				{
 					for(int noteNum = 0; noteNum < sizes[channelNum]; noteNum++)
 					{
@@ -241,17 +262,18 @@ public class Trainer
 			}
 			
 			// begin automatic labelling
-			for(int channelNum = 0; channelNum < channels.length; channelNum++)
+			//for(int channelNum = 0; channelNum < channels.length; channelNum++)
 			{
+				int channelNum = dataNum % 2 == 1 ? 0 : 2;
 				// sort to be able to use binary search function
 				Arrays.sort(notes[channelNum]);
 				
 				// for each key class, "YES" label if a note belonging to that class is present in the current midi
-				if(channels[channelNum] == PIANO)
+				if(channels[channelNum] == PIANO || channels[channelNum] == CLARINET)
 				{
 					for(int keyClass = 0; keyClass < PIANO_NUMKEYCLASSES; keyClass++)
 					{
-						label[channelNum].write(Arrays.binarySearch(notes[channelNum], keyClass) >= 0 ? "1 " : "0 ");
+						label.write(Arrays.binarySearch(notes[channelNum], keyClass) >= 0 ? "1 " : "0 ");
 					}
 				}
 				
@@ -269,12 +291,12 @@ public class Trainer
 								break;
 							}
 						}
-						label[channelNum].write(found ? "1 " : "0 ");
+						label.write(found ? "1 " : "0 ");
 					}
 				}
-				label[channelNum].write("\n");
-				label[channelNum].flush();
-				label[channelNum].close();
+				label.write("\n");
+				label.flush();
+				label.close();
 			}
 		}
 	}

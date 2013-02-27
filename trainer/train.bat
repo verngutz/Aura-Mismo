@@ -7,7 +7,7 @@ javac Trainer.java
 ECHO Running Training Set Mtext Generator...
 java Trainer
 ECHO Converting Training Set Mtext to MIDI...
-FOR /L %%A IN (0,1,1499) DO echo.|Mtx2Midi -r %%A.mtx
+FOR /L %%A IN (0,1,5999) DO echo.|Mtx2Midi -r %%A.mtx
 mkdir midi
 mv *.mid midi
 mkdir mtx

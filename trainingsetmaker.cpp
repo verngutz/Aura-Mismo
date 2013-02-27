@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <iomanip>
 
 // for reading WAV files
 #include <sndfile.h>
@@ -17,29 +18,28 @@
 #include "magnitude_point.cpp"
 #include <algorithm>
 
-// for parallelism
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
 #include "params.h"
 
 using namespace std;
 
-long long positives[NUM_KEYS + NUM_DRUM_GROUPS];
-long long negatives[NUM_KEYS + NUM_DRUM_GROUPS];
+long long piano_positives[NUM_KEYS];
+long long piano_negatives[NUM_KEYS];
+
+long long clarinet_positives[NUM_KEYS];
+long long clarinet_negatives[NUM_KEYS];
    
 void hamming(int window_length, float buffer[]);
 void stft(vector<float> &signal, long signal_length, int window_size, int hop_size, 
-			int piano_labels[], int drum_labels[], ofstream piano_training_files[], ofstream drum_training_files[]);
+			int labels[], ofstream training_files[], long long positives[], long long negatives[]);
 
+int wav_num = 0;
 int main() {
 
 	cout << "Begin writing training data" << endl;
 	
 	// open all training files for writing
    ofstream piano_training_files[NUM_KEYS];
-   ofstream drum_training_files[NUM_DRUM_GROUPS];
+   //ofstream clarinet_training_files[NUM_KEYS];
    
    for(int i = 0; i < NUM_KEYS; i++) {
    	stringstream training_filename;
@@ -47,22 +47,41 @@ int main() {
    	piano_training_files[i].open(training_filename.str().c_str());
    }
    
-   for(int i = 0; i < NUM_DRUM_GROUPS; i++) {
+   /**
+   for(int i = 0; i < NUM_KEYS; i++) {
    	stringstream training_filename;
-   	training_filename << DRUM_TRAINING_FILE << i << ".txt";
-   	drum_training_files[i].open(training_filename.str().c_str());
+   	training_filename << CLARINET_TRAINING_FILE << i << ".txt";
+   	clarinet_training_files[i].open(training_filename.str().c_str());
    }
+   */
    
    // reset label count
-   memset(positives, 0, sizeof(long long) * (NUM_KEYS + NUM_DRUM_GROUPS));
-   memset(negatives, 0, sizeof(long long) * (NUM_KEYS + NUM_DRUM_GROUPS));
+   memset(piano_positives, 0, sizeof(long long) * NUM_KEYS);
+   memset(piano_negatives, 0, sizeof(long long) * NUM_KEYS);
+   
+   //memset(clarinet_positives, 0, sizeof(long long) * NUM_KEYS);
+   //memset(clarinet_negatives, 0, sizeof(long long) * NUM_KEYS);
    
    // populate training files with STFT data from each training WAV file
-   for(int i = 0; i < NUM_WAVS; i++) {
+   for(int i = 0; i < NUM_WAVS /* * 2 */; i++) {
 
+		wav_num = i;
+		
 		// get wav file name
 		stringstream wav_filename;
-		wav_filename << WAVE_FILE << i << ".wav";
+		
+		wav_filename << "wav/" << i << ".wav";
+		
+		/**
+		if(i < NUM_WAVS)
+		{
+			wav_filename << PIANO_WAV_DIR << i << ".wav";
+		}
+		else
+		{
+			wav_filename << CLARINET_WAV_DIR << (i-NUM_WAVS) << ".wav";
+		}
+		*/
 	
 		cout << "Processing WAV file: " << wav_filename.str();
 	
@@ -91,33 +110,41 @@ int main() {
 		sf_close(infile);
 	
 		// open, read, and close label files
-		ifstream piano_label_file;
-		ifstream drum_label_file;
+		ifstream label_file;
 		
-		stringstream piano_label_filename;
-		stringstream drum_label_filename;
+		stringstream label_filename;
 		
-		piano_label_filename << LABEL_DIR << i << PIANO_LABEL_EXT;
-		drum_label_filename << LABEL_DIR << i << DRUM_LABEL_EXT;
+		label_filename << "label/" << i << ".label";
 		
-		piano_label_file.open(piano_label_filename.str().c_str());
-		drum_label_file.open(drum_label_filename.str().c_str());
+		/**
+		if(i < NUM_WAVS)
+		{
+			label_filename << PIANO_LABEL_DIR << i << LABEL_EXT;
+		}
+		else
+		{
+			label_filename << CLARINET_LABEL_DIR << (i-NUM_WAVS) << LABEL_EXT;
+		}
+		*/
 		
-		int piano_labels[NUM_KEYS];
-		int drum_labels[NUM_DRUM_GROUPS];
+		label_file.open(label_filename.str().c_str());
+		
+		int labels[NUM_KEYS];
 		
 		for(int j = 0; j < NUM_KEYS; j++) {
-			piano_label_file >> piano_labels[j];
+			label_file >> labels[j];
 		}
-		piano_label_file.close();
-		
-		for(int j = 0; j < NUM_DRUM_GROUPS; j++) {
-			drum_label_file >> drum_labels[j];
-		}
-		drum_label_file.close();
+		label_file.close();
 	
 	  	// get STFT of signal vector, match them up with labels, and write results to training files
-		stft(signal, signal_length, WINDOW_SIZE, HOP_SIZE, piano_labels, drum_labels, piano_training_files, drum_training_files);
+		//if(i < NUM_WAVS)
+		//{
+			stft(signal, signal_length, WINDOW_SIZE, HOP_SIZE, labels, piano_training_files, piano_positives, piano_negatives);
+		//}
+		//else
+		//{
+		//	stft(signal, signal_length, WINDOW_SIZE, HOP_SIZE, labels, clarinet_training_files, clarinet_positives, clarinet_negatives);
+		//}
 		cout << "DONE" << endl;
 	}
 	
@@ -126,17 +153,21 @@ int main() {
 		piano_training_files[i].close();
 	}
 	
-	for(int i = 0; i < NUM_DRUM_GROUPS; i++) {
-		drum_training_files[i].close();
+	/**
+	for(int i = 0; i < NUM_KEYS; i++) {
+		clarinet_training_files[i].close();
 	}
+	*/
 	
 	cout << "Training data writing done" << endl;
 	for(int i = 0; i < NUM_KEYS; i++) {
-		cout << "Key " << i << " has " << positives[i] << " positives and " << negatives[i] << " negatives " << endl;
+		cout << "Piano Key " << i << " has " << piano_positives[i] << " positives and " << piano_negatives[i] << " negatives " << endl;
 	}
-	for(int i = NUM_KEYS; i < NUM_KEYS + NUM_DRUM_GROUPS; i++) {
-		cout << "Drum Group " << i << " has " << positives[i] << " positives and " << negatives[i] << " negatives " << endl;
+	/**
+	for(int i = 0; i < NUM_KEYS; i++) {
+		cout << "Clarinet Key " << i << " has " << clarinet_positives[i] << " positives and " << clarinet_negatives[i] << " negatives " << endl;
 	}
+	*/
 	
 	return 0;
 }
@@ -148,7 +179,7 @@ void hamming(int window_length, float buffer[]) {
 }
 
 void stft(vector<float> &signal, long signal_length, int window_size, int hop_size, 
-			int piano_labels[], int drum_labels[], ofstream piano_training_files[], ofstream drum_training_files[]) {
+			int labels[], ofstream training_files[], long long positives[], long long negatives[]) {
    
 	// declare input data bucket, output fft_result bucket, and plan
 	fftw_complex *data, *fft_result;
@@ -170,12 +201,20 @@ void stft(vector<float> &signal, long signal_length, int window_size, int hop_si
 	bool stop = false;
 	long num_chunks = 0;
 	bool first_time = true;
+	int negalimiter[NUM_KEYS];
+	for(int i = 0; i < NUM_KEYS; i++)
+		negalimiter[i] = 0;
+		
 	while(chunk_pos < signal_length && !stop) {
 	
 		// progress report
-		if(num_chunks % 3 == 0) {
+		if(num_chunks % 5 == 0)
+		{
 			cout << ".";
 			cout.flush();
+		}
+					
+		if(num_chunks % TRAINING_SHRINKER == 0) {
 		
 			// read chunk from signal vector, write to input data bucket
 			for(int i = 0; i < window_size; i++) {
@@ -197,7 +236,7 @@ void stft(vector<float> &signal, long signal_length, int window_size, int hop_si
 			// determine if chunk has a sound or is silent
 			bool has_signal = false;
 			for(int i = 0; i < window_size; i++) {
-				if(fft_result[i][0] > 0.0001) {
+				if((int)(fft_result[i][0] * fft_result[i][0]) > 0) {
 					has_signal = true;
 				}
 			}
@@ -220,48 +259,21 @@ void stft(vector<float> &signal, long signal_length, int window_size, int hop_si
 					mags.pop();
 				}
 				sort(peaks.begin(), peaks.end(), index_sort);
-			
-				// increase label count
+				
+				// write label and peaks
 				for(int i = 0; i < NUM_KEYS; i++) {
-					if(has_signal && piano_labels[i] == 1) {
-						positives[i]++;
+					int res = ( has_signal ? labels[i] : 0 );
+					if(res == 1 || negalimiter[i]++ % NEGA_LIMITER == 0)
+					{
+						training_files[i] << res;
+						for(int j = 0; j < NUM_PEAKS; j++) {
+							if((int)(peaks[j].magnitude) != 0)
+								training_files[i] << " " << setw(4) << right << (peaks[j].index + 1) << ":" << setw(4) << left << (int)(peaks[j].magnitude);
+						}
+						training_files[i] << endl;
+						if(res == 1) positives[i]++;
+						else negatives[i] ++;
 					}
-					else {
-						negatives[i]++;
-					}
-				}
-			
-				for(int i = 0; i < NUM_DRUM_GROUPS; i++) {
-					if(has_signal && drum_labels[i] == 1) {
-						positives[NUM_KEYS + i]++;
-					}
-					else {
-						negatives[NUM_KEYS + i]++;
-					}
-				}
-			
-				// write label
-				for(int i = 0; i < NUM_KEYS; i++) {
-					piano_training_files[i] << ( has_signal ? piano_labels[i] : 0 );
-				}
-			
-				for(int i = 0; i < NUM_DRUM_GROUPS; i++) {
-					drum_training_files[i] << ( has_signal ? drum_labels[i] : 0 );
-				}
-			
-				// write peaks to training files
-				for(int i = 0; i < NUM_KEYS; i++) {
-					for(int j = 0; j < NUM_PEAKS; j++) {
-						piano_training_files[i] << " " << (peaks[j].index + 1) << ":" << (int)(peaks[j].magnitude);
-					}
-					piano_training_files[i] << endl;
-				}
-			
-				for(int i = 0; i < NUM_DRUM_GROUPS; i++) {
-					for(int j = 0; j < NUM_PEAKS; j++) {
-						drum_training_files[i] << " " << (peaks[j].index + 1) << ":" << (int)(peaks[j].magnitude);
-					}
-					drum_training_files[i] << endl;
 				}
 			}
 		}

@@ -1,87 +1,137 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <cmath>
 
 using namespace std;
 
 int main() {
-	ifstream piano_predict_out;
-	ifstream drum_predict_out;
+	ifstream predict_out_0;
+	ifstream predict_out_1;
 	
-	piano_predict_out.open("output0.txt");
-	drum_predict_out.open("output1.txt");
+	predict_out_0.open("output0.txt");
+	predict_out_1.open("output1.txt");
 	
-	ifstream piano_true_out;
-	ifstream drum_true_out;
+	ifstream true_out_0;
+	ifstream true_out_1;
 	
-	piano_true_out.open("test_0.out");
-	drum_true_out.open("test_1.out");
+	true_out_0.open("test_0.out");
+	true_out_1.open("test_1.out");
 	
-	long double false_positives = 0;
-	long double false_negatives = 0;
+	long double false_positives_0 = 0;
+	long double false_positives_1 = 0;
+	long double false_negatives_0 = 0;
+	long double false_negatives_1 = 0;
 	long double num_labels = 0;
 	
-	int true_label;
-	int predict_label;
+	int true_label_0;
+	int true_label_1;
+	int predict_label_0;
+	int predict_label_1;
 	
 	int cols, rows;
-	piano_predict_out >> cols >> rows;
-	drum_predict_out >> cols >> rows;
+	predict_out_0 >> cols >> rows;
+	predict_out_1 >> cols >> rows;
 	
-	while(piano_true_out >> true_label && piano_predict_out >> predict_label) {
-		if(true_label == 0 && predict_label == 1) {
-			false_positives++;
+	int num_pos = 0;
+	int num_neg = 0;
+	
+	while(true_out_0 >> true_label_0 && true_out_1 >> true_label_1 
+	&& predict_out_0 >> predict_label_0 && predict_out_1 >> predict_label_1) {
+		if(true_label_0 == 0 && predict_label_0 == 1) {
+			false_positives_0++;
 		}
-		if(true_label == 1 && predict_label == 0) {
-			false_negatives++;
+		if(true_label_0 == 1 && predict_label_0 == 0) {
+			false_negatives_0++;
+		}
+		if(true_label_1 == 0 && predict_label_1 == 1) {
+			false_positives_0++;
+		}
+		if(true_label_1 == 1 && predict_label_1 == 0) {
+			false_negatives_0++;
+		}
+		if(true_label_0 == 0 && predict_label_1 == 1) {
+			false_positives_1++;
+		}
+		if(true_label_0 == 1 && predict_label_1 == 0) {
+			false_negatives_1++;
+		}
+		if(true_label_1 == 0 && predict_label_0 == 1) {
+			false_positives_1++;
+		}
+		if(true_label_1 == 1 && predict_label_0 == 0) {
+			false_negatives_1++;
+		}
+		if(true_label_0 == 0)
+		{
+			num_neg++;
+		}
+		else
+		{
+			num_pos++;
+		}
+		if(true_label_1 == 0)
+		{
+			num_neg++;
+		}
+		else
+		{
+			num_pos++;
+		}
+		num_labels+=2;
+	}
+	
+	while(true_out_0 >> true_label_0) {
+		if(true_label_0 == 1) {
+			false_negatives_0++;
+			false_negatives_1++;
+			num_pos++;
+		}
+		else
+		{
+			num_neg++;
 		}
 		num_labels++;
 	}
 	
-	while(piano_true_out >> true_label) {
-		if(true_label == 1) {
-			false_negatives++;
+	while(true_out_1 >> true_label_1) {
+		if(true_label_1 == 1) {
+			false_negatives_0++;
+			false_negatives_1++;
+			num_pos++;
+		}
+		else
+		{
+			num_neg++;
 		}
 		num_labels++;
 	}
 	
-	while(piano_predict_out >> predict_label)	{
-		if(predict_label == 1) {
-			false_positives++;
-		}
-		num_labels++;
-	}
+	long double false_positives;
+	long double false_negatives;
 	
-	while(drum_true_out >> true_label && drum_predict_out >> predict_label) {
-		if(true_label == 0 && predict_label == 1) {
-			false_positives++;
-		}
-		if(true_label == 1 && predict_label == 0) {
-			false_negatives++;
-		}
-		num_labels++;
+	if(false_positives_0 + false_negatives_0 < false_positives_1 + false_negatives_1) {
+		cout << "Matched 0 to 0, 1 to 1" << endl;
+		false_positives = false_positives_0;
+		false_negatives = false_negatives_0;
 	}
-	
-	while(drum_true_out >> true_label) {
-		if(true_label == 1) {
-			false_negatives++;
-		}
-		num_labels++;
-	}
-	
-	while(drum_predict_out >> predict_label)	{
-		if(predict_label == 1) {
-			false_positives++;
-		}
-		num_labels++;
+	else {
+		cout << "Matched 0 to 1, 1 to 0" << endl;
+		false_positives = false_positives_1;
+		false_negatives = false_negatives_1;
 	}
 	
 	cout << "Total labels: " << num_labels << endl;
+	cout << "Positives: " << num_pos << endl;
+	cout << "Negatives: " << num_neg << endl;
 	cout << "False positives: " << false_positives << endl;
 	cout << "False negatives: " << false_negatives << endl;
-	cout << "False positives percentage: " << setprecision(3) << 100 * false_positives / num_labels << endl;
-	cout << "False negatives percentage: " << setprecision(3) << 100 * false_negatives / num_labels << endl;
-	cout << "Total error: " << setprecision(3) << 100 * (false_positives + false_negatives) / num_labels << endl;
-	
+	cout << "False positives percentage: " << setprecision(3) << 100 * false_positives / num_labels << "%" << endl;
+	cout << "False negatives percentage: " << setprecision(3) << 100 * false_negatives / num_labels << "%" << endl;
+	double error = 100 * (false_positives + false_negatives) / num_labels;
+	cout << "Total error: " << setprecision(3) <<  error << "%" << endl;
+	cout << "Total raw accuracy: " << setprecision(3) <<  100 - error << "%" << endl;
+	cout << "Total positive accuracy: " << setprecision(3) << 100 - 100 * false_negatives / num_pos << "%" << endl;
+	cout << "Total negative accuracy: " << setprecision(3) << 100 - 100 * false_positives / num_neg << "%" << endl;	
 	return 0;
 }

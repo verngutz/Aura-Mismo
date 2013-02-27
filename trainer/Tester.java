@@ -10,8 +10,10 @@ public class Tester
 	public static final double TICKS_PER_CHUNK = TICKS_PER_SECOND / CHUNKS_PER_SECOND;
 	public static final double AUDIBLE_VOLUME = 55;
 	
-	public static final int PIANO = 1;
+	public static final int PIANO = 2;
 	public static final int PIANO_NUMKEYCLASSES = 12;
+	
+	public static final int CLARINET = 1;
 	
 	public static final int DRUMS = 10;
 	public static final int[] drumBass = {35, 36};
@@ -21,7 +23,7 @@ public class Tester
 	public static final int[] drumTom = {41, 43, 45, 47, 48, 50};
 	public static final int[][] drumAll = { drumBass, drumSnare, drumCrash, drumHat, drumTom };
 	
-	public static final int[] channels = {PIANO, DRUMS};
+	public static final int[] channels = {CLARINET, PIANO};
 	
 	public static void main(String args[]) throws IOException
 	{
@@ -37,10 +39,10 @@ public class Tester
 		
 		// each channel will have a map from a time to a (change in) note event info
 		// TreeMap is used so that the time step can vary easily (just use floorEntry)
-		TreeMap<Integer, boolean[]> noteEvents[] = new TreeMap[channels.length];
+		TreeMap<Double, boolean[]> noteEvents[] = new TreeMap[channels.length];
 		for(int channelNum = 0; channelNum < channels.length; channelNum++)
 		{
-			noteEvents[channelNum] = new TreeMap<Integer, boolean[]>();
+			noteEvents[channelNum] = new TreeMap<Double, boolean[]>();
 		}
 		
 		// whether or not to interpret a line as a midi event
@@ -59,7 +61,7 @@ public class Tester
 			if(parseTrack)
 			{
 				Scanner lineScanner = new Scanner(line);
-				int time = lineScanner.nextInt();
+				double time = lineScanner.nextDouble();
 				String midiEvent = lineScanner.next();
 				
 				// only note on and off events are relevant for labelling
@@ -73,13 +75,13 @@ public class Tester
 					// make a new time point if there are no note events on this time yet
 					if(!noteEvents[channelIndex].containsKey(time))
 					{
-						noteEvents[channelIndex].put(time, new boolean[channel == PIANO ? PIANO_NUMKEYCLASSES : drumAll.length]);
-						Integer lower = noteEvents[channelIndex].lowerKey(time);	
+						noteEvents[channelIndex].put(time, new boolean[channel == PIANO || channel == CLARINET ? PIANO_NUMKEYCLASSES : drumAll.length]);
+						Double lower = noteEvents[channelIndex].lowerKey(time);	
 						
 						// copy previous note event info, if any
 						if(lower != null)
 						{
-							for(int noteNum = 0; noteNum < (channel == PIANO ? PIANO_NUMKEYCLASSES : drumAll.length); noteNum++)
+							for(int noteNum = 0; noteNum < (channel == PIANO || channel == CLARINET  ? PIANO_NUMKEYCLASSES : drumAll.length); noteNum++)
 							{
 								noteEvents[channelIndex].get(time)[noteNum] = noteEvents[channelIndex].get(lower)[noteNum];
 							}
@@ -94,7 +96,7 @@ public class Tester
 					String[] v = lineScanner.next().split("=");
 					int volume = Integer.parseInt(v[1]);
 					
-					if(channel == PIANO)
+					if(channel == PIANO || channel == CLARINET)
 					{
 						noteEvents[channelIndex].get(time)[note % PIANO_NUMKEYCLASSES] = volume > AUDIBLE_VOLUME;
 					}
@@ -139,11 +141,11 @@ public class Tester
 		for(int channelNum = 0; channelNum < channels.length; channelNum++)
 		{
 			// create a label row per chunk
-			for(int time = 0; ; time += TICKS_PER_CHUNK)
+			for(double time = 0; ; time += TICKS_PER_CHUNK)
 			{
 				// get note event info at time nearest but lower than current chunk's time
-				Map.Entry<Integer, boolean[]> noteEntry = noteEvents[channelNum].floorEntry(time);
-				boolean[] turnedOn = (noteEntry == null ? new boolean[channels[channelNum] == PIANO ? PIANO_NUMKEYCLASSES : drumAll.length] : noteEntry.getValue());
+				Map.Entry<Double, boolean[]> noteEntry = noteEvents[channelNum].floorEntry(time);
+				boolean[] turnedOn = (noteEntry == null ? new boolean[channels[channelNum] == PIANO || channels[channelNum] == CLARINET ? PIANO_NUMKEYCLASSES : drumAll.length] : noteEntry.getValue());
 				
 				out[channelNum].write(turnedOn[0] ? "1" : "0");
 				for(int noteNum = 1; noteNum < turnedOn.length; noteNum++)

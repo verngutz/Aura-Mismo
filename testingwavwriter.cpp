@@ -1,5 +1,7 @@
 #include <vector>
 #include <iostream>
+#include <cstdlib>
+#include <iomanip>
 
 // for reading WAV files
 #include <fstream>
@@ -20,17 +22,24 @@ using namespace std;
 
 void hamming(int window_length, float buffer[]);
 void stft(vector<float> &signal, long signal_length, int window_size, int hop_size, ofstream &testing_file);
+void proc(const char* TESTING_FILE, const char* WAV_FILE);
 
 int main() {
-
 	cout << "Begin writing testing data" << endl;
-	
+	//proc("testing.txt", "test.wav");
+	proc(TESTING_FILE_0, WAV_FILE_0);
+	proc(TESTING_FILE_1, WAV_FILE_1);
+	cout << "Testing data writing done" << endl;
+	return 0;
+}
+
+void proc(const char* TESTING_FILE, const char* WAV_FILE) {
+
 	// open testing file for writing
 	ofstream testing_file;
 	testing_file.open(TESTING_FILE);
    
    // populate testing file with STFT data from testing WAV file
-   
 	cout << "Processing WAV file: " << WAV_FILE;
 		
 	// open WAV file
@@ -38,7 +47,7 @@ int main() {
 	SNDFILE *infile = sf_open(WAV_FILE, SFM_READ, &sfinfo);
 	if (!infile) {
 		cerr << "Not able to open input file: " << WAV_FILE << endl;
-		return 1;
+		exit(1);
 	}
 	
 	// read WAV data into buffer and push buffered data into signal vector
@@ -62,10 +71,6 @@ int main() {
 		
 	// close testing file
 	testing_file.close();
-	
-	cout << "Testing data writing done" << endl;
-	
-	return 0;
 }
 
 void hamming(int window_length, float buffer[]) {
@@ -140,7 +145,7 @@ void stft(vector<float> &signal, long signal_length, int window_size, int hop_si
 		// write peaks to testing file
 		bool firstentry = true;
 		for(int i = 0; i < NUM_PEAKS; i++) {
-			testing_file << (firstentry ? "" : " ") << (peaks[i].index + 1) << ":" << (int)(peaks[i].magnitude);
+			testing_file << (firstentry ? "" : " ") << setw(4) << right << (peaks[i].index + 1) << ":" << setw(4) << left << (int)(peaks[i].magnitude);
 			firstentry = false;
 		}
 		

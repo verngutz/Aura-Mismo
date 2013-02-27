@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 	param.weight = NULL;
 	
 	int start = 0;
-	int end = NUM_KEYS + NUM_DRUM_GROUPS;
+	int end = NUM_KEYS; //* 2;
 	
 	if(argc > 1)
 	{
@@ -56,10 +56,10 @@ int main(int argc, char* argv[]) {
 	// create SVM for each training file
 	for( int i = start; i < end; i++ ) {
 		if(i < NUM_KEYS) {
-			cout << "Training Key: " << i << endl;
+			cout << "Training Piano Key: " << i << endl;
 		}
 		else {
-			cout << "Training Drum Group: " << i - NUM_KEYS << endl;
+			cout << "Training Clarinet: " << i - NUM_KEYS << endl;
 		}
 		
 		// get training file name
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 		}
 		else
 		{
-			training_file_name << DRUM_TRAINING_FILE << i - NUM_KEYS << ".txt";
+			training_file_name << CLARINET_TRAINING_FILE << i - NUM_KEYS << ".txt";
 		}
 		
 		// create SVM problem from training file
